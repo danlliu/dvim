@@ -15,16 +15,33 @@
 
 namespace dvim {
 
+/*
+ * Interface between UsageHint and the TUI.
+ */
 class UsageHintView {
  public:
+  /*
+   * Initializes the usage hint view in the specified window manager.
+   */
   UsageHintView(dcurses::WindowManager &manager);
 
-  void handleInput(char ch);
+  /*
+   * Destroys the usage hint view, and removes the corresponding window.
+   */
+  ~UsageHintView();
 
+  /*
+   * Refreshes the usage hint view, to update the contents.
+   */
   void refresh();
 
+  /*
+   * Sets the hints that are shown.
+   */
   void setHints(const std::vector<std::string> &hints);
+
  private:
+  dcurses::WindowManager &windowManager_;
   std::shared_ptr<dcurses::Window> window_;
   std::vector<std::string> hints_;
 };

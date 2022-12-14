@@ -14,9 +14,13 @@
 
 namespace dvim {
 
-UsageHintView::UsageHintView(dcurses::WindowManager &manager) : hints_ {} {
+UsageHintView::UsageHintView(dcurses::WindowManager &manager) : windowManager_(manager), hints_ {} {
   manager.addWindow("usageHints", {manager.getHeight() - 10, 0, manager.getWidth(), 10, 0, DEFAULT_BORDER});
   window_ = manager["usageHints"];
+}
+
+UsageHintView::~UsageHintView() {
+  windowManager_.removeWindow("usageHints");
 }
 
 void UsageHintView::refresh() {

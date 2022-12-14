@@ -27,10 +27,6 @@ WindowManager::WindowManager() {
 }
 
 WindowManager::~WindowManager() {
-  // ESC[2J clears the screen.
-  std::cout << ESC << "[2J" << std::flush;
-  // ESC[H move cursor to top left.
-  std::cout << ESC << "[H" << std::flush;
 }
 
 void WindowManager::addWindow(const std::string &name, const WindowSettings &settings) {
@@ -65,8 +61,11 @@ void WindowManager::refresh() {
   // Sort windows by zIndex.
   std::priority_queue<int, std::vector<int>, decltype(comp)> windowQueue{begin(ids), end(ids), comp};
 
-  // ESC[2J clears the screen.
+  // system("clear");
+  
   std::cout << ESC << "[2J" << std::flush;
+  std::cout << ESC << "[3J" << std::flush;
+
   // ESC[H move cursor to top left.
   std::cout << ESC << "[H" << std::flush;
 

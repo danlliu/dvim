@@ -1,3 +1,4 @@
 *.o
 *.o.dbg
 *.dSYM
+.vscode

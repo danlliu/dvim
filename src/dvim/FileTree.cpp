@@ -55,6 +55,14 @@ void FileTree::close(std::filesystem::path path) {
   openPaths_.erase(path);
 }
 
+void FileTree::toggle(std::filesystem::path path) {
+  if (openPaths_.count(path)) {
+    close(path);
+  } else {
+    open(path);
+  }
+}
+
 std::vector<std::string> FileTree::toString() {
   auto res = stringifyPath(path_);
   line2path_ = {};

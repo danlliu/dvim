@@ -14,8 +14,14 @@
 
 namespace dcurses {
 
+/*
+ * Class to manage and display multiple windows.
+ */
 class WindowManager {
  public:
+  /*
+   * A POD struct containing information about a window.
+   */
   struct WindowSettings {
     unsigned int row;
     unsigned int col;
@@ -25,14 +31,21 @@ class WindowManager {
     Window::WindowBorder border;
   };
 
+  /*
+   * Construct a new WindowManager. Automatically detects screen width and height.
+   */
   WindowManager();
+
+  /*
+   * Deleted copy and move constructors/assignment operators.
+   */
   WindowManager(const WindowManager& other) = delete;
   WindowManager& operator=(const WindowManager& other) = delete;
   WindowManager(const WindowManager&& other) = delete;
   WindowManager& operator=(const WindowManager&& other) = delete;
 
   /*
-   * Destructor. Cleans up the screen one last time.
+   * Destructor. Does nothing.
    */
   ~WindowManager();
 

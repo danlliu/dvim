@@ -19,8 +19,9 @@ std::string base64Encode(std::filebuf &input) {
   std::string output;
   long count = 0;
   while ((count = input.sgetn(group, 3))) {
-    // i'm sorry sgetn insisted on using signed chars :(
-    int32_t value = ((unsigned char) group[0] << 16) | ((unsigned char) group[1] << 8) | (unsigned char) group[2];
+    int32_t value = (static_cast<unsigned char>(group[0]) << 16) 
+      | (static_cast<unsigned char>(group[1]) << 8) 
+      | static_cast<unsigned char>(group[2]);
     output += base64Chars[(value >> 18) & 0x3F];
     output += base64Chars[(value >> 12) & 0x3F];
     if (count == 1) {
@@ -48,7 +49,7 @@ std::string base64Encode(const std::string &input) {
     if (i >= size(input)) {
       return 0;
     }
-    return (unsigned char) input[i];
+    return static_cast<unsigned char>(input[i]);
   };
   for (unsigned int i = 0; i < size(input); i += 3) {
     int32_t group = (charAt(i) << 16) | (charAt(i + 1) << 8) | charAt(i + 2);

@@ -11,6 +11,11 @@
 
 namespace dvim {
 
+/*
+ * Layout manager for usage hints. Takes a list of usage hints and a width, and
+ * returns a vector of lines. The hints are spread across the width equally,
+ * and fill in from left to right, top to bottom.
+ */
 std::vector<std::string> layoutUsageHints(const std::vector<std::string> &hints, unsigned int width);
 
 }

@@ -16,12 +16,19 @@
 #define DEFAULT_BORDER {"+","-","+","|","+","-","+","|"}
 #else
 #define DEFAULT_BORDER {"\u250c","\u2500","\u2510","\u2502","\u2518","\u2500","\u2514","\u2502"}
+#define DOUBLE_BORDER {"\u2554","\u2550","\u2557","\u2551","\u255d","\u2550","\u255a","\u2551"}
 #endif
 
 namespace dcurses {
 
+/*
+ * An object representing a TUI window.
+ */
 class Window {
  public:
+  /*
+   * A POD struct containing the border characters for a window.
+   */
   struct WindowBorder {
     std::string top_left_;
     std::string top_;
@@ -33,6 +40,9 @@ class Window {
     std::string left_;
   };
 
+  /*
+   * A POD struct containing all the details of an image.
+   */
   struct ImageContent {
     unsigned int row_;
     unsigned int col_;
