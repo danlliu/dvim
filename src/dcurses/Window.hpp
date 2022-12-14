@@ -14,6 +14,7 @@
 
 #ifdef ASCIIONLY
 #define DEFAULT_BORDER {"+","-","+","|","+","-","+","|"}
+#define DOUBLE_BORDER {"#", "=","#","|","#","=","#","|"}
 #else
 #define DEFAULT_BORDER {"\u250c","\u2500","\u2510","\u2502","\u2518","\u2500","\u2514","\u2502"}
 #define DOUBLE_BORDER {"\u2554","\u2550","\u2557","\u2551","\u255d","\u2550","\u255a","\u2551"}
@@ -122,6 +123,18 @@ class Window {
    */
   int zIndex() const { return zIndex_; }
 
+  /*
+   * Set iterm2 status.
+   */
+  static void setIterm2(int iterm2) { 
+    if (iterm2_ == -1) iterm2_ = iterm2; 
+  }
+
+  /*
+   * Get iterm2 status.
+   */
+  static int getIterm2() { return iterm2_; }
+
  private:
   struct RenderDirection {
     unsigned int row;
@@ -136,6 +149,11 @@ class Window {
   unsigned int height_;
   int zIndex_;
   WindowBorder border_;
+
+  // -1 = unsure
+  // 0 = not iterm2
+  // 1 = iterm2
+  static int iterm2_;
 };
 
 }  // namespace dcurses

@@ -17,23 +17,20 @@ UTIL_O = $(UTIL_CPP:%.cpp=%.o)
 # No default rules.
 .SUFFIXES:
 
-$(SRC)/%.o: $(SRC)/%.cpp
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
-
-$(SRC)/%.o.dbg: $(SRC)/%.cpp
-	$(CXX) $(DBGFLAGS) -c $^ -o $@
-
 dvim: $(SRC)/main.cpp $(DCURSES_O) $(DVIM_O) $(UTIL_O)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(MODE) $^ -o $@
 
 dvim_dbg: $(SRC)/main.cpp $(DCURSES_O:%.o=%.o.dbg) $(DVIM_O:%.o=%.o.dbg) $(UTIL_O:%.o=%.o.dbg)
-	$(CXX) $(DBGFLAGS) $^ -o $@
-
-.PHONY: all
-all: dvim
+	$(CXX) $(DBGFLAGS) $(MODE) $^ -o $@
 
 .PHONY: debug
 debug: dvim_dbg
+
+$(SRC)/%.o: $(SRC)/%.cpp
+	$(CXX) $(CXXFLAGS) $(MODE) -c $^ -o $@
+
+$(SRC)/%.o.dbg: $(SRC)/%.cpp
+	$(CXX) $(DBGFLAGS) $(MODE) -c $^ -o $@
 
 .PHONY: clean
 clean: 

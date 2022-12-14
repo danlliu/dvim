@@ -86,4 +86,6 @@ void Window::clear() {
   setString(height_ - 1, width_ - 1, border_.bottom_right_);
 }
 
+int Window::iterm2_ = -1;
+
 }  // namespace dcurses

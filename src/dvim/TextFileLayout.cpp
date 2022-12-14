@@ -44,7 +44,7 @@ std::vector<std::string> layoutFileWithLineNums(const std::string& fileContents,
   for (unsigned int i = 0; i < leftPadding - size(std::to_string(lineNumber)); ++i) {
     line.push_back(' ');
   }
-  line += std::to_string(lineNumber++);
+  line += "\33[38;5;243m" + std::to_string(lineNumber++) + "\33[0m";
   line += " ";
 
   for (char ch : fileContents) {
@@ -54,7 +54,7 @@ std::vector<std::string> layoutFileWithLineNums(const std::string& fileContents,
       for (unsigned int i = 0; i < leftPadding - size(std::to_string(lineNumber)); ++i) {
         line.push_back(' ');
       }
-      line += std::to_string(lineNumber++);
+      line += "\33[38;5;243m" + std::to_string(lineNumber++) + "\33[0m";
       line += " ";
     } else {
       line.push_back(ch);

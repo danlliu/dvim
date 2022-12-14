@@ -2,3 +2,6 @@
 *.o.dbg
 *.dSYM
 .vscode
+# executables
+dvim
+dvim_dbg

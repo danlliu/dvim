@@ -55,7 +55,7 @@ void FileTreeView::refresh() {
     unsigned int col = 2;
     for (auto c : dvim::splitVisibleCharacters(line)) {
       if (i + scroll_ == cursor_ ) {
-        window_->setString(row, col, std::string{"\033[48;5;238m"} + c + std::string{"\033[0m"});
+        window_->setString(row, col, std::string{"\033[48;5;243m"} + c + std::string{"\033[0m"});
       } else {
         window_->setString(row, col, c);
       }

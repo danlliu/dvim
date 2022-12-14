@@ -33,13 +33,20 @@ class RawSTTY {
 };
 
 int main() {
-  RawSTTY stty;
+  // RawSTTY stty;
 
-  std::ifstream img("rickroll.png", std::ios::binary);
-  std::stringstream contents;
-  contents << img.rdbuf();
-  std::string img_contents = contents.str();
+  // iterm2 detection
+  FILE* fp = popen("echo $LC_TERMINAL", "r");
+  char value[2];
+  dcurses::Window::setIterm2(fread(&value, 1, 2, fp) == 2);
 
-  dvim::dvimController controller;
-  controller.run();
+  std::cout << dcurses::Window::getIterm2() << std::endl;
+
+  // std::ifstream img("rickroll.png", std::ios::binary);
+  // std::stringstream contents;
+  // contents << img.rdbuf();
+  // std::string img_contents = contents.str();
+
+  // dvim::dvimController controller;
+  // controller.run();
 }

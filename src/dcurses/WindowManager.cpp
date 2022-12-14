@@ -64,7 +64,6 @@ void WindowManager::refresh() {
   // system("clear");
   
   std::cout << ESC << "[2J" << std::flush;
-  std::cout << ESC << "[3J" << std::flush;
 
   // ESC[H move cursor to top left.
   std::cout << ESC << "[H" << std::flush;
