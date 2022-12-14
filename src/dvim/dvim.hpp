@@ -10,6 +10,7 @@
 #include "FileTreeView.hpp"
 #include "UsageHintView.hpp"
 #include "PreviewWindow.hpp"
+#include "EditorView.hpp"
 
 #include "dcurses/WindowManager.hpp"
 
@@ -30,10 +31,17 @@ class dvimController {
    */
   void run();
  private:
+  enum dvimState {
+    PREVIEW,
+    EDITOR
+  };
+  dvimState state = dvimState::PREVIEW;
+
   dcurses::WindowManager manager_;
   dvim::FileTreeView ftv_;
   dvim::UsageHintView uhv_;
   std::unique_ptr<dvim::PreviewWindow> pw_;
+  std::unique_ptr<dvim::EditorView> ev_;
 };
 
 }

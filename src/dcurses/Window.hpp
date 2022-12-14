@@ -83,10 +83,9 @@ class Window {
   /*
    * Renders an image at the specified position. The contents and sizing of the image are specified by the ImageContent struct passed in.
    * Characters are indexed from 0, with (0,0) being the top-left border character.
-   * @param row The row of the top left corner of the image.
-   * @param col The column of the top left corner of the image.
+   * @param image The data for the image to render.
    */
-  void drawImage(unsigned int row, unsigned int col, const ImageContent &image);
+  void drawImage(const ImageContent &image);
 
   /*
    * Renders the window onto the screen, using `row_` and `col_` as the top left corner.

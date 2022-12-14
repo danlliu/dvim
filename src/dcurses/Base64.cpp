@@ -10,34 +10,6 @@
 
 namespace dcurses {
 
-std::string base64Encode(std::filebuf &input) {
-  static const std::string base64Chars = 
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "abcdefghijklmnopqrstuvwxyz"
-    "0123456789+/";
-  char group[3] = {0, 0, 0};
-  std::string output;
-  long count = 0;
-  while ((count = input.sgetn(group, 3))) {
-    int32_t value = (static_cast<unsigned char>(group[0]) << 16) 
-      | (static_cast<unsigned char>(group[1]) << 8) 
-      | static_cast<unsigned char>(group[2]);
-    output += base64Chars[(value >> 18) & 0x3F];
-    output += base64Chars[(value >> 12) & 0x3F];
-    if (count == 1) {
-      output += "=";
-    } else {
-      output += base64Chars[(value >> 6) & 0x3F];
-    }
-    if (count == 2) {
-      output += "=";
-    } else {
-      output += base64Chars[value & 0x3F];
-    }
-  }
-  return output;
-}
-
 std::string base64Encode(const std::string &input) {
   static const std::string base64Chars = 
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

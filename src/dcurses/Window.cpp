@@ -43,8 +43,12 @@ void Window::setString(unsigned int row, unsigned int col, const std::string& st
   directions_.emplace_back(RenderDirection{ row, col, string });
 }
 
-void Window::drawImage(unsigned int row, unsigned int col, const ImageContent &image) {
-  directions_.emplace_back(RenderDirection{ row, col, image });
+void Window::drawImage(const ImageContent &image) {
+  if (iterm2_) {
+    directions_.emplace_back(RenderDirection{ image.row_, image.col_, image });
+  } else {
+    directions_.emplace_back(RenderDirection{ image.row_, image.col_, std::string{ "Image content." }});
+  }
 }
 
 void Window::refresh() {
@@ -64,7 +68,7 @@ void Window::refresh() {
       const auto &image = std::get<ImageContent>(direction.content);
       std::cout << ESC << "]1337;File=inline=1;size=" << size(image.content_);
       std::cout << ";width=" << image.width_ << ";height=" << image.height_;
-      std::cout << ":" << base64Encode(image.content_) << "\a";
+      std::cout << ":" << dcurses::base64Encode(image.content_) << "\a";
     }
   }
   std::cout << std::flush;

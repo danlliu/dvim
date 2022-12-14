@@ -3,5 +3,5 @@
 *.dSYM
 .vscode
 # executables
-dvim
-dvim_dbg
+/dvim
+/dvim_dbg

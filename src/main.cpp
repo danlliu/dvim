@@ -1,8 +1,9 @@
 // Copyright 2022 Daniel Liu
 
 #include "dvim/dvim.hpp"
+#include "dcurses/Base64.hpp"
 
-#include "dvim/TextFileLayout.hpp"
+#include "dvim/Editor.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -33,20 +34,13 @@ class RawSTTY {
 };
 
 int main() {
-  // RawSTTY stty;
+  RawSTTY stty;
 
   // iterm2 detection
   FILE* fp = popen("echo $LC_TERMINAL", "r");
   char value[2];
   dcurses::Window::setIterm2(fread(&value, 1, 2, fp) == 2);
 
-  std::cout << dcurses::Window::getIterm2() << std::endl;
-
-  // std::ifstream img("rickroll.png", std::ios::binary);
-  // std::stringstream contents;
-  // contents << img.rdbuf();
-  // std::string img_contents = contents.str();
-
-  // dvim::dvimController controller;
-  // controller.run();
+  dvim::dvimController controller;
+  controller.run();
 }
