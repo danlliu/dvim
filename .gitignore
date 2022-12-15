@@ -5,3 +5,5 @@
 # executables
 /dvim
 /dvim_dbg
+# test files
+test_files
