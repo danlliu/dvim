@@ -40,6 +40,10 @@ void WindowManager::addWindow(const std::string &name, const WindowSettings &set
 void WindowManager::removeWindow(const std::string &name) {
   windows_.erase(windowsByName_[name]);
   windowsByName_.erase(name);
+  for (auto &[id, window] : windows_) {
+    window->clearCache();
+  }
+  std::cout << ESC << "[2J" << std::flush;
 }
 
 std::shared_ptr<Window> WindowManager::operator[](const std::string &name) {
@@ -63,14 +67,14 @@ void WindowManager::refresh() {
 
   // system("clear");
   
-  std::cout << ESC << "[2J" << std::flush;
-  std::cout << ESC << "[3J" << std::flush;
+  // std::cout << ESC << "[2J" << std::flush;
+  std::cout << ESC << "[3J";
 
   // ESC[H move cursor to top left.
-  std::cout << ESC << "[H" << std::flush;
+  std::cout << ESC << "[H";
 
   // Hide cursor.
-  std::cout << ESC << "[?25l" << std::flush;
+  std::cout << ESC << "[?25l";
 
   // Draw windows.
   while (!windowQueue.empty()) {

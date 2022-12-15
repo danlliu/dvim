@@ -15,10 +15,17 @@
 #define LEADER std::string{"|"}
 #define LEADERBOTTOM std::string{"+"}
 #else
+#ifdef NONF
+#define CLOSEDFOLDER std::string{"\u25b6"}
+#define OPENFOLDER std::string{"\u25bc"}
+#define LEADER std::string{"\u2502"}
+#define LEADERBOTTOM std::string{"\u2514"}
+#else
 #define CLOSEDFOLDER std::string{"\ue5ff"}
 #define OPENFOLDER std::string{"\ue5fe"}
 #define LEADER std::string{"\u2502"}
 #define LEADERBOTTOM std::string{"\u2514"}
+#endif
 #endif
 
 namespace dvim {
@@ -26,6 +33,9 @@ namespace dvim {
 std::string ext2icon(const std::filesystem::path &path) {
 #ifdef ASCIIONLY
   return "*";
+#else
+#ifdef NONF
+  return "\u2750";
 #else
   // Special file names
   if (path.filename() == ".gitignore") return "\33[38;5;196m\uf7a1\33[0m";
@@ -42,6 +52,7 @@ std::string ext2icon(const std::filesystem::path &path) {
   if (ext == ".py") return "\33[38;5;226m\uf81f\33[0m";
   if (ext == ".png" || ext == ".jpg") return "\uf71e";
   return "\uf713";
+#endif
 #endif
 }
 

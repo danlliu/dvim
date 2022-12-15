@@ -38,6 +38,11 @@ class EditorView {
   void handleInput(char ch);
 
   /*
+   * Get the usage hints for the current mode.
+   */
+  std::vector<std::string> getUsageHints() const { return editor_.getUsageHints(); }
+
+  /*
    * Refreshes the editor view, to update the contents.
    */
   void refresh();
@@ -47,6 +52,7 @@ class EditorView {
   std::shared_ptr<dcurses::Window> window_;
   Editor editor_;
 
+  std::filesystem::path path_;
   unsigned int scroll_ = 0;
 };
 

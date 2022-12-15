@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "Utilities.hpp"
+
 namespace dvim {
 
 std::vector<std::string> layoutFile(const std::string& fileContents, unsigned int width) {
@@ -58,7 +60,7 @@ std::vector<std::string> layoutFileWithLineNums(const std::string& fileContents,
       line += " ";
     } else {
       line.push_back(ch);
-      if (size(line) >= width) {
+      if (size(dvim::splitVisibleCharacters(line)) >= width) {
         lines.emplace_back(line);
         line.clear();
         for (unsigned int i = 0; i < leftPadding + 1; ++i) {

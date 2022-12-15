@@ -11,6 +11,7 @@ namespace dvim {
 
 std::vector<std::string> splitVisibleCharacters(const std::string &str) {
   std::vector<std::string> result;
+  std::string color = "";
   std::string fragment = "";
   bool escaping = false;
   int unicoding = 0;
@@ -24,12 +25,18 @@ std::vector<std::string> splitVisibleCharacters(const std::string &str) {
     if ((c & 0xc0) == 0x80) unicoding--;
     fragment += c;
     if (!escaping && !unicoding) {
+      if (color != "") fragment += "\33[0m";
       result.emplace_back(fragment);
-      fragment = "";
+      fragment = color;
     }
     if (escaping) {
       if (c == 'm') {
         escaping = false;
+        if (fragment == "\33[0m") {
+          color = "";
+        } else {
+          color = fragment;
+        }
       }
     }
   }

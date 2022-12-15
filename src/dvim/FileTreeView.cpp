@@ -16,7 +16,7 @@ namespace dvim {
 
 FileTreeView::FileTreeView(const std::filesystem::path &path, dcurses::WindowManager &manager) : 
   windowManager_(manager), fileTree_(path) {
-  manager.addWindow("fileTree", {0, 0, 30, manager.getHeight() - 10, 0, DEFAULT_BORDER});
+  manager.addWindow("fileTree", {0, 0, 30, manager.getHeight() - 10, 1, DEFAULT_BORDER});
   window_ = manager["fileTree"];
   heightAvailable_ = window_->height() - 2;
 }

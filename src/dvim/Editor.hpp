@@ -25,6 +25,11 @@ class Editor {
   void handleInput(char ch);
 
   /*
+   * Get the usage hints for the current mode.
+   */
+  std::vector<std::string> getUsageHints() const;
+
+  /*
    * Returns a list of the current lines, with the cursor highlighted.
    */
   std::vector<std::string> getLines(unsigned int width);

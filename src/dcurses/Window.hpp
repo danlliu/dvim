@@ -98,6 +98,11 @@ class Window {
   void clear();
 
   /*
+   * Clears the rendering cache.
+   */
+  void clearCache();
+
+  /*
    * Get the row of the window's top left corner.
    */
   unsigned int row() const { return row_; }
@@ -148,6 +153,9 @@ class Window {
   unsigned int height_;
   int zIndex_;
   WindowBorder border_;
+
+  bool hasImages_ = false;
+  std::vector<std::vector<std::string>> cache_;
 
   // -1 = unsure
   // 0 = not iterm2

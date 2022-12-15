@@ -30,14 +30,15 @@ dvimController::dvimController() :
 
 void dvimController::run() {
   while (true) {
-    ftv_.refresh();
-    uhv_.refresh();
     if (state == dvimState::PREVIEW) {
       pw_->setPath(ftv_.getSelectedPath());
       pw_->refresh();
     } else if (state == dvimState::EDITOR) {
       ev_->refresh();
+      uhv_.setHints(ev_->getUsageHints());
     }
+    ftv_.refresh();
+    uhv_.refresh();
     manager_.refresh();
     char ch = (char) getc(stdin);
     if (ch == 'q') {

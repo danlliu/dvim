@@ -12,6 +12,12 @@ To render symbols properly, install your favorite font from [NerdFonts](https://
 make
 ```
 
+If you don't have NerdFonts installed, compile as:
+
+```
+make MODE=-DNONF
+```
+
 Alternatively, for ASCII-only mode, compile as:
 
 ```

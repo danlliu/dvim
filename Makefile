@@ -26,8 +26,8 @@ dvim_dbg: $(SRC)/main.cpp $(DCURSES_O:%.o=%.o.dbg) $(DVIM_O:%.o=%.o.dbg) $(UTIL_
 .PHONY: debug
 debug: dvim_dbg
 
-$(SRC)/%.o: $(SRC)/%.cpp
-	$(CXX) $(CXXFLAGS) $(MODE) -c $^ -o $@
+$(SRC)/%.o: $(SRC)/%.cpp $(SRC)/%.hpp
+	$(CXX) $(CXXFLAGS) $(MODE) -c $< -o $@
 
 $(SRC)/%.o.dbg: $(SRC)/%.cpp
 	$(CXX) $(DBGFLAGS) $(MODE) -c $^ -o $@
