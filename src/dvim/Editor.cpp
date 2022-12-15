@@ -45,6 +45,8 @@ void Editor::handleInput(char ch) {
 
 void Editor::normalInput(char c) {
   switch (c) {
+    // Navigation Commands
+
     case 'h':
       if (cursorColumn_ != 0) {
         --cursorColIterator_;
@@ -91,6 +93,19 @@ void Editor::normalInput(char c) {
       }
       break;
 
+    case '^':
+      cursorColumn_ = 0;
+      cursorColIterator_ = begin(*cursorLineIterator_);
+      break;
+
+    case '$':
+      cursorColumn_ = static_cast<unsigned int>(size(*cursorLineIterator_) - 1);
+      cursorColIterator_ = begin(*cursorLineIterator_);
+      std::advance(cursorColIterator_, cursorColumn_);
+      break;
+
+    // Mode Switching Commands
+
     case ':':
       // Enter command mode
       mode = EditorMode::COMMAND;
@@ -111,6 +126,31 @@ void Editor::normalInput(char c) {
       }
       break;
 
+    case 'o':
+      // Enter insert mode on a new line
+      {
+        mode = EditorMode::INSERT;
+        auto nextLineIterator = cursorLineIterator_;
+        ++nextLineIterator;
+        lines_.emplace(nextLineIterator, std::list<char>());
+        ++cursorLineIterator_;
+        ++cursorLine_;
+        cursorColIterator_ = begin(*cursorLineIterator_);
+        cursorColumn_ = 0;
+      }
+
+    case 'O':
+      // Enter insert mode one line before
+      {
+        mode = EditorMode::INSERT;
+        lines_.emplace(cursorLineIterator_, std::list<char>());
+        --cursorLineIterator_;
+        cursorColIterator_ = begin(*cursorLineIterator_);
+        cursorColumn_ = 0;
+      }
+
+    // In-Place Editing Commands
+
     case 'x':
       // Delete character at cursor.
       {
@@ -122,9 +162,11 @@ void Editor::normalInput(char c) {
         if (newColIterator == end(*cursorLineIterator_)) {
           newColIterator = cursorColIterator_;
           --newColIterator;
+          if (newColIterator != begin(*cursorLineIterator_)) {
+            --cursorColumn_;
+          }
         }
         cursorLineIterator_->erase(cursorColIterator_);
-        --cursorColumn_;
         cursorColIterator_ = newColIterator;
       }
       break;
@@ -239,8 +281,13 @@ std::vector<std::string> Editor::getUsageHints() const {
         "j - move down",
         "k - move up",
         "l - move right",
+        "^ - go to beginning of line",
+        "$ - go to end of line",
         "i - insert character",
         "a - append character",
+        "o - add line below",
+        "O - add line above",
+        ": - enter command mode",
         "x - delete character"
       };
     case EditorMode::INSERT:

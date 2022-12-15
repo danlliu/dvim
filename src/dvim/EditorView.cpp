@@ -43,6 +43,7 @@ void EditorView::refresh() {
 
   std::string title = " " + path_.filename().string() + " [" + editor_.getMode() + "] ";
   window_->setString(0, 2, title);
+  window_->setString(window_->height() - 1, 2, " R" + std::to_string(editor_.getCursorLine()) + ":C" + std::to_string(editor_.getCursorColumn()) + " ");
   
   // Check scroll bounds
   if (editor_.getCursorScroll() < scroll_) {

@@ -71,7 +71,7 @@ std::vector<std::string> layoutFileWithLineNums(const std::string& fileContents,
     }
   }
 
-  if (line != "") {
+  if (size(line) > leftPadding + 16 || size(lines) == 0) {
     lines.emplace_back(line);
   }
   return lines;
