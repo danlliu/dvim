@@ -61,7 +61,7 @@ void PreviewWindow::refresh() {
     // Regular text
     auto layout = layoutFileWithLineNums(contents, window_->width() - 4);
     for (unsigned int row = 1; row < window_->height() - 1; ++row) {
-      if (row >= size(layout)) break;
+      if (row > size(layout)) break;
       unsigned int col = 2;
       window_->setString(row, col, layout[row - 1]);
     }

@@ -12,6 +12,7 @@
 #include <variant>
 #include <vector>
 
+#define NO_BORDER {" "," "," "," "," "," "," "," "}
 #ifdef ASCIIONLY
 #define DEFAULT_BORDER {"+","-","+","|","+","-","+","|"}
 #define DOUBLE_BORDER {"#", "=","#","|","#","=","#","|"}

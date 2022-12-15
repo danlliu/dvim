@@ -16,6 +16,9 @@
 
 namespace dvim {
 
+// Forward declaration
+class dvimController;
+
 /*
  * Interface between the Editor and the TUI.
  */
@@ -25,7 +28,8 @@ class EditorView {
    * Constructs the editor view in the specified window manager, using the
    * provided path.
    */
-  EditorView(const std::filesystem::path &path, dcurses::WindowManager &manager);
+  EditorView(const std::filesystem::path &path, dcurses::WindowManager &manager,
+             dvim::dvimController& controller);
 
   /*
    * Destroys the editor view, and removes the corresponding window.
@@ -50,6 +54,8 @@ class EditorView {
  private:
   dcurses::WindowManager &windowManager_;
   std::shared_ptr<dcurses::Window> window_;
+  std::shared_ptr<dcurses::Window> commandWindow_;
+  dvim::dvimController& controller_;
   Editor editor_;
 
   std::filesystem::path path_;

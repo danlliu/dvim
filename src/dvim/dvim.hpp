@@ -30,6 +30,17 @@ class dvimController {
    * Run dvim.
    */
   void run();
+
+  /*
+   * Switch to the EDITOR state.
+   */
+  void switchToEditor();
+
+  /*
+   * Switch back to PREVIEW state.
+   */
+  void switchToPreview();
+
  private:
   enum dvimState {
     PREVIEW,

@@ -28,9 +28,10 @@ std::vector<std::string> layoutFile(const std::string& fileContents, unsigned in
       }
     }
   }
-
+  if (line != "") {
+    lines.emplace_back(line);
+  }
   return lines;
-
 }
 
 std::vector<std::string> layoutFileWithLineNums(const std::string& fileContents, unsigned int width) {
@@ -70,8 +71,10 @@ std::vector<std::string> layoutFileWithLineNums(const std::string& fileContents,
     }
   }
 
+  if (line != "") {
+    lines.emplace_back(line);
+  }
   return lines;
-
 }
 
 }

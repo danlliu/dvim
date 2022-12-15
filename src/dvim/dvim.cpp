@@ -28,6 +28,18 @@ dvimController::dvimController() :
   });
 }
 
+void dvimController::switchToEditor() {
+  pw_.reset();
+  ev_ = std::make_unique<dvim::EditorView>(ftv_.getSelectedPath(), manager_, *this);
+  state = dvimState::EDITOR;
+}
+
+void dvimController::switchToPreview() {
+  ev_.reset();
+  pw_ = std::make_unique<dvim::PreviewWindow>(ftv_.getSelectedPath(), manager_);
+  state = dvimState::PREVIEW;
+}
+
 void dvimController::run() {
   while (true) {
     if (state == dvimState::PREVIEW) {
@@ -41,15 +53,12 @@ void dvimController::run() {
     uhv_.refresh();
     manager_.refresh();
     char ch = (char) getc(stdin);
-    if (ch == 'q') {
-      break;
-    }
     if (state == dvimState::PREVIEW) {
-      if (ch == '\r') {
+      if (ch == 'q') {
+        break;
+      } else if (ch == '\r') {
         // move to editor
-        pw_.reset();
-        ev_ = std::make_unique<dvim::EditorView>(ftv_.getSelectedPath(), manager_);
-        state = dvimState::EDITOR;
+        switchToEditor();
         manager_.refresh();
       }
     }

@@ -35,7 +35,7 @@ std::vector<std::string> splitVisibleCharacters(const std::string &str) {
         if (fragment == "\33[0m") {
           color = "";
         } else {
-          color = fragment;
+          color += fragment;
         }
       }
     }

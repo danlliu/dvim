@@ -50,10 +50,17 @@ class Editor {
   unsigned int getCursorScroll() const { return cursorScroll_; }
 
   /*
+   * Returns the current command contents.
+   */
+  std::string getCommandContents() const { return commandContents_; }
+
+  /*
    * Returns the current mode.
    */
   std::string getMode() const {
     switch (mode) {
+      case EditorMode::STOPPED:
+        return "STOPPED";
       case EditorMode::NORMAL:
         return "NORMAL";
       case EditorMode::INSERT:
@@ -67,13 +74,22 @@ class Editor {
 
  private:
   enum EditorMode {
+    STOPPED,
     NORMAL,
     INSERT,
     COMMAND,
     VISUAL
   };
 
+  void normalInput(char c);
+  void insertInput(char c);
+  void commandInput(char c);
+  void visualInput(char c);
+
+  void executeCommand();
+
   EditorMode mode = EditorMode::NORMAL;
+  std::filesystem::path path_;
   std::list<std::list<char>> lines_;
   unsigned int cursorLine_ = 0;
   unsigned int cursorColumn_ = 0;
@@ -92,6 +108,8 @@ class Editor {
   //   cursorColIterator_ may be an end iterator if and only if the cursor is at the end of the line (past the last character).
   std::list<std::list<char>>::iterator cursorLineIterator_;
   std::list<char>::iterator cursorColIterator_;
+
+  std::string commandContents_ = "";
 };
 
 };
