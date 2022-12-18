@@ -1,0 +1,21 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Compile check with default flags
+      run: make clean && make
+    - name: Compile check, NONF
+      run: make clean && make MODE=-DNONF
+    - name: Compile check, ASCIIONLY
+      run: make clean && make MODE=-DASCIIONLY
