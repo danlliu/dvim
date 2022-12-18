@@ -4,6 +4,7 @@
 
 #include "WindowManager.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <memory>

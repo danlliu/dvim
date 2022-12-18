@@ -94,8 +94,17 @@ mode, the user can switch between four different modes: `NORMAL`, `INSERT`,
 
 ##### `NORMAL` mode
 `NORMAL` mode is used to navigate the cursor across the file, giving the ability
-to move the cursor up (`k`), down (`j`), left (`h`), and right (`l`). To switch
-to `INSERT` mode, the following commands can be used:
+to move the cursor up (`k`), down (`j`), left (`h`), and right (`l`). The full
+list of navigation commands is:
+
+- `h`: move the cursor left.
+- `j`: move the cursor down.
+- `k`: move the cursor up.
+- `l`: move the cursor right.
+- `^`: move the cursor to the first character of the line.
+- `$`: move the cursor to the last character of the line.
+
+To switch to `INSERT` mode, the following commands can be used:
 
 - `i`: enter `INSERT` mode at the current cursor location.
 - `a`: enter `INSERT` mode at the position _after_ the current cursor location
@@ -113,9 +122,30 @@ following commands can be used:
 To switch to `COMMAND` mode, the following command can be used:
 - `:`: enters `COMMAND` mode.
 
+To switch to `VISUAL` mode, the following command can be used:
+- `v`: enters `VISUAL` mode at the current cursor location.
 
 ##### `INSERT` mode
 `INSERT` mode is used to edit the file directly.
+
+##### `COMMAND` mode
+`COMMAND` mode is used to issue commands to dvim. The following commands are
+available:
+
+- `w`: write to the file, saving it.
+- `q`: quit the editor for the current file.
+
+Single-letter commands can be placed sequentially; ex. `wq` saves the file and
+exits the editor.
+
+##### `VISUAL` mode
+`VISUAL` mode is used to select areas of text for modification. In `VISUAL`
+mode, the following commands are available:
+
+- `h`: move the cursor left.
+- `j`: move the cursor down.
+- `k`: move the cursor up.
+- `l`: move the cursor right.
 
 ## Acknowledgements
 
