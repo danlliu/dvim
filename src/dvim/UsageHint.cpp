@@ -24,9 +24,9 @@ std::vector<std::string> layoutUsageHints(const std::vector<std::string> &hints,
   }
   unsigned long spacingLeft = width - columns * longestHint;
   std::vector<std::string> result;
-  for (unsigned int i = 0; i < size(hints); i += columns) {
+  for (unsigned long i = 0; i < size(hints); i += columns) {
     std::string line = "";
-    for (unsigned int j = 0; j < columns; j++) {
+    for (unsigned long j = 0; j < columns; j++) {
       line += hints[i + j];
       line += std::string(longestHint - hints[i + j].size(), ' ');
       line += std::string((spacingLeft + j) / columns, ' ');

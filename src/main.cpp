@@ -16,21 +16,32 @@ class RawSTTY {
  public:
   RawSTTY() {
     // Save the screen.
-    system("tput smcup");
+    if (system("tput smcup")) {
+      std::cout << "tput smcup failed" << std::endl;
+      exit(1);
+    }
     std::cout << "\33[?47h" << std::flush;
     FILE* saved_stty = popen("stty -g", "r");
     char buf[1024];
-    fgets(buf, 1024, saved_stty);
-    saved = std::string(buf);
-    system("stty raw");
+    saved_ = std::string(fgets(buf, 1024, saved_stty));
+    if (system("stty raw")) {
+      std::cout << "stty raw failed" << std::endl;
+      exit(1);
+    }
   }
   ~RawSTTY() {
-    system((std::string("stty ") + saved).c_str());
+    if (system((std::string("stty ") + saved_).c_str())) {
+      std::cout << "stty restore failed" << std::endl;
+      exit(1);
+    }
     // Restore the screen
-    system("tput rmcup");
+    if (system("tput rmcup")) {
+      std::cout << "tput rmcup failed" << std::endl;
+      exit(1);
+    }
   }
  private:
-  std::string saved;
+  std::string saved_;
 };
 
 int main() {

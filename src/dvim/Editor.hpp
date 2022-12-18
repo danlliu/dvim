@@ -69,6 +69,8 @@ class Editor {
         return "COMMAND";
       case EditorMode::VISUAL:
         return "VISUAL";
+      default:
+        return "UNKNOWN";
     }
   }
 
