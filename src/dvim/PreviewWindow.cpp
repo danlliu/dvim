@@ -4,6 +4,7 @@
 
 #include "PreviewWindow.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <memory>
