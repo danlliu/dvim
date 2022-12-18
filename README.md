@@ -88,7 +88,34 @@ From here, the user can enter `EDITOR` mode by selecting a file in the file tree
 using `j`, `k`, and `SPACE` to navigate, then pressing `ENTER` to open the file.
 
 #### `EDITOR` mode
-In `EDITOR` mode, the user is able to edit the selected file.
+In `EDITOR` mode, the user is able to edit the selected file. Within `EDITOR` 
+mode, the user can switch between four different modes: `NORMAL`, `INSERT`, 
+`COMMAND`, and `VISUAL` mode.
+
+##### `NORMAL` mode
+`NORMAL` mode is used to navigate the cursor across the file, giving the ability
+to move the cursor up (`k`), down (`j`), left (`h`), and right (`l`). To switch
+to `INSERT` mode, the following commands can be used:
+
+- `i`: enter `INSERT` mode at the current cursor location.
+- `a`: enter `INSERT` mode at the position _after_ the current cursor location
+(append to the current location).
+- `o`: insert a new line on the line _after_ the current cursor location, and
+enter `INSERT` mode on that new line.
+- `O`: insert a new line on the line _before_ the current cursor location, and
+enter `INSERT` mode on that new line.
+
+Additionally, some editing can be performed directly from `NORMAL` mode. The
+following commands can be used:
+
+- `x`: delete the character at the current cursor location.
+
+To switch to `COMMAND` mode, the following command can be used:
+- `:`: enters `COMMAND` mode.
+
+
+##### `INSERT` mode
+`INSERT` mode is used to edit the file directly.
 
 ## Acknowledgements
 

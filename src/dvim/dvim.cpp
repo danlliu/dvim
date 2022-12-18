@@ -11,6 +11,7 @@
 #include "dcurses/Window.hpp"
 #include "dcurses/WindowManager.hpp"
 #include "FileTreeView.hpp"
+#include "Logging.hpp"
 #include "UsageHintView.hpp"
 #include "PreviewWindow.hpp"
 
@@ -49,10 +50,14 @@ void dvimController::run() {
       ev_->refresh();
       uhv_.setHints(ev_->getUsageHints());
     }
+    LOG("Refreshing file tree and usage hints...");
     ftv_.refresh();
     uhv_.refresh();
+    LOG("Refreshing manager window...");
     manager_.refresh();
+    LOG("Finished refreshing.");
     char ch = (char) getc(stdin);
+    LOG("Got input: " + std::to_string(static_cast<int>(ch)));
     if (state == dvimState::PREVIEW) {
       if (ch == 'q') {
         break;
@@ -60,10 +65,9 @@ void dvimController::run() {
         // move to editor
         switchToEditor();
         manager_.refresh();
+      } else {
+        ftv_.handleInput(ch);
       }
-    }
-    if (state == dvimState::PREVIEW) {
-      ftv_.handleInput(ch);
     } else if (state == dvimState::EDITOR) {
       ev_->handleInput(ch);
     }

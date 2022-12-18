@@ -86,6 +86,12 @@ class Editor {
   void commandInput(char c);
   void visualInput(char c);
 
+  // Common movement
+  void moveCursorLeft();
+  void moveCursorRight();
+  void moveCursorUp();
+  void moveCursorDown();
+
   void executeCommand();
 
   EditorMode mode = EditorMode::NORMAL;
@@ -95,8 +101,11 @@ class Editor {
   unsigned int cursorColumn_ = 0;
   unsigned int cursorScroll_ = 0;
 
+  // unsigned int visualStartLine_ = 0;
+  // unsigned int visualStartColumn_ = 0;
+
   // Invariants:
-  // If NORMAL or COMMAND mode:
+  // If NORMAL, COMMAND, or VISUAL mode:
   // - cursorLineIterator_ refers to the line that the cursor is on.
   //   cursorLineIterator_ may be an end iterator if and only if there are no lines.
   // - cursorColIterator_ refers to the column that the cursor is on.
@@ -108,6 +117,9 @@ class Editor {
   //   cursorColIterator_ may be an end iterator if and only if the cursor is at the end of the line (past the last character).
   std::list<std::list<char>>::iterator cursorLineIterator_;
   std::list<char>::iterator cursorColIterator_;
+
+  std::list<std::list<char>>::iterator visualStartLineIterator_;
+  std::list<char>::iterator visualStartColIterator_;
 
   std::string commandContents_ = "";
 };

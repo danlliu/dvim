@@ -43,54 +43,70 @@ void Editor::handleInput(char ch) {
   }
 }
 
+void Editor::moveCursorLeft() {
+  if (cursorColumn_ != 0) {
+    --cursorColIterator_;
+    --cursorColumn_;
+  }
+}
+
+void Editor::moveCursorDown() {
+  if (cursorLine_ != size(lines_) - 1) {
+    ++cursorLineIterator_;
+    ++cursorLine_;
+    if (cursorColumn_ >= size(*cursorLineIterator_)) {
+      if (size(*cursorLineIterator_) == 0) {
+        cursorColumn_ = 0;
+      } else {
+        cursorColumn_ = static_cast<unsigned int>(size(*cursorLineIterator_) - 1);
+      }
+    }
+    cursorColIterator_ = begin(*cursorLineIterator_);
+    std::advance(cursorColIterator_, cursorColumn_);
+  }
+}
+
+void Editor::moveCursorUp() {
+  if (cursorLine_ != 0) { 
+    --cursorLineIterator_;
+    --cursorLine_;
+    if (cursorColumn_ >= size(*cursorLineIterator_)) {
+      if (size(*cursorLineIterator_) == 0) {
+        cursorColumn_ = 0;
+      } else {
+        cursorColumn_ = static_cast<unsigned int>(size(*cursorLineIterator_) - 1);
+      }
+    }
+    cursorColIterator_ = begin(*cursorLineIterator_);
+    std::advance(cursorColIterator_, cursorColumn_);
+  }
+}
+
+void Editor::moveCursorRight() {
+  if (cursorColumn_ != size(*cursorLineIterator_) - 1) {
+    ++cursorColIterator_;
+    ++cursorColumn_;
+  }
+}
+
 void Editor::normalInput(char c) {
   switch (c) {
     // Navigation Commands
 
     case 'h':
-      if (cursorColumn_ != 0) {
-        --cursorColIterator_;
-        --cursorColumn_;
-      }
+      moveCursorLeft();
       break;
 
     case 'j':
-      if (cursorLine_ != size(lines_) - 1) {
-        ++cursorLineIterator_;
-        ++cursorLine_;
-        if (cursorColumn_ >= size(*cursorLineIterator_)) {
-          if (size(*cursorLineIterator_) == 0) {
-            cursorColumn_ = 0;
-          } else {
-            cursorColumn_ = static_cast<unsigned int>(size(*cursorLineIterator_) - 1);
-          }
-        }
-        cursorColIterator_ = begin(*cursorLineIterator_);
-        std::advance(cursorColIterator_, cursorColumn_);
-      }
+      moveCursorDown();
       break;
 
     case 'k':
-      if (cursorLine_ != 0) { 
-        --cursorLineIterator_;
-        --cursorLine_;
-        if (cursorColumn_ >= size(*cursorLineIterator_)) {
-          if (size(*cursorLineIterator_) == 0) {
-            cursorColumn_ = 0;
-          } else {
-            cursorColumn_ = static_cast<unsigned int>(size(*cursorLineIterator_) - 1);
-          }
-        }
-        cursorColIterator_ = begin(*cursorLineIterator_);
-        std::advance(cursorColIterator_, cursorColumn_);
-      }
+      moveCursorUp();
       break;
 
     case 'l':
-      if (cursorColumn_ != size(*cursorLineIterator_) - 1) {
-        ++cursorColIterator_;
-        ++cursorColumn_;
-      }
+      moveCursorRight();
       break;
 
     case '^':
@@ -138,6 +154,7 @@ void Editor::normalInput(char c) {
         cursorColIterator_ = begin(*cursorLineIterator_);
         cursorColumn_ = 0;
       }
+      break;
 
     case 'O':
       // Enter insert mode one line before
@@ -148,6 +165,15 @@ void Editor::normalInput(char c) {
         cursorColIterator_ = begin(*cursorLineIterator_);
         cursorColumn_ = 0;
       }
+      break;
+
+
+    case 'v':
+      // Enter visual mode at the current position
+      mode = EditorMode::VISUAL;
+      visualStartLineIterator_ = cursorLineIterator_;
+      visualStartColIterator_ = cursorColIterator_;
+      break;
 
     // In-Place Editing Commands
 
@@ -179,7 +205,9 @@ void Editor::insertInput(char c) {
     mode = EditorMode::NORMAL;
     // if we are in a one past the end state, reset to end of line
     if (cursorColIterator_ == end(*cursorLineIterator_)) {
-      --cursorColumn_;
+      if (cursorColumn_ != 0) {
+        --cursorColumn_;
+      }
       cursorColIterator_ = begin(*cursorLineIterator_);
       std::advance(cursorColIterator_, cursorColumn_);
     }
@@ -242,6 +270,10 @@ void Editor::commandInput(char c) {
     if (mode == EditorMode::COMMAND) {
       mode = EditorMode::NORMAL;
     }
+  } else if (c == '\x7f') {
+    if (size(commandContents_) != 0) {
+      commandContents_.pop_back();
+    }
   } else {
     commandContents_ += c;
   }
@@ -268,7 +300,30 @@ void Editor::executeCommand() {
   commandContents_ = "";
 }
 
-void Editor::visualInput(char c) {}
+void Editor::visualInput(char c) {
+  switch (c) {
+    case '\33':
+      // ESC = exit visual mode
+      mode = EditorMode::NORMAL;
+      break;
+    case 'h':
+      // Move left
+      moveCursorLeft();
+      break;
+    case 'j':
+      // Move down
+      moveCursorDown();
+      break;
+    case 'k':
+      // Move up
+      moveCursorUp();
+      break;
+    case 'l':
+      // Move right
+      moveCursorRight();
+      break;
+  }
+}
 
 std::vector<std::string> Editor::getUsageHints() const {
   std::vector<std::string> hints;
@@ -307,27 +362,44 @@ std::vector<std::string> Editor::getUsageHints() const {
 }
 
 std::vector<std::string> Editor::getLines(unsigned int width) {
-
   unsigned int textWidth = width - static_cast<unsigned int>(size(std::to_string(size(lines_)))) - 2;
   unsigned int paddingWidth = width - textWidth;
 
   unsigned int lineNumber = 1;
+  bool isVisual = false;
+  bool overlap = (visualStartLineIterator_ == cursorLineIterator_ && visualStartColIterator_ == cursorColIterator_);
   std::vector<std::string> lines;
-  for (auto lit = begin(lines_); lit != end(lines_); ++lit) {
+
+  unsigned int i = 0;
+  unsigned int j = 0;
+
+  for (auto lit = begin(lines_); lit != end(lines_); ++lit, ++i) {
     std::string line = "";
     line += "\33[38;5;243m" + std::to_string(lineNumber) + "\33[0m";
     line += " ";
     line = std::string(paddingWidth - static_cast<unsigned int>(size(std::to_string(lineNumber))) - 1, ' ') + line;
     ++lineNumber;
 
+    j = 0;
     for (auto cit = begin(*lit); cit != end(*lit); ++cit) {
-      if (lit == cursorLineIterator_ && cit == cursorColIterator_) {
+      if (mode == VISUAL && lit == visualStartLineIterator_ && 
+        cit == visualStartColIterator_ && !overlap) {
+        line += "\33[48;5;243m" + std::string{*cit} + "\33[0m";
+        isVisual = !isVisual;
+      } else if (lit == cursorLineIterator_ && cit == cursorColIterator_) {
         line += "\33[48;5;243m" + std::string{*cit} + "\33[0m";
         cursorScroll_ = static_cast<unsigned int>(size(lines));
+        if (mode == VISUAL && !overlap) {
+          isVisual = !isVisual;
+        }
+      } else if (mode == VISUAL && isVisual) {
+        line += "\33[48;5;243m" + std::string{*cit} + "\33[0m";
       } else {
         line += *cit;
       }
-      if (size(dvim::splitVisibleCharacters(line)) >= textWidth) {
+      ++j;
+      if (j + paddingWidth == textWidth) {
+        j = 0;
         lines.emplace_back(line);
         line = std::string(paddingWidth, ' ');
       }

@@ -15,6 +15,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include "Logging.hpp"
+
 #define ESC "\33"
 
 namespace dcurses {
@@ -30,6 +32,7 @@ WindowManager::~WindowManager() {
 }
 
 void WindowManager::addWindow(const std::string &name, const WindowSettings &settings) {
+  LOG("Added window: " + name + " with width: " + std::to_string(settings.width) + " and height: " + std::to_string(settings.height));
   std::shared_ptr<Window> window = std::make_shared<Window>(
     settings.row, settings.col, settings.width, settings.height, settings.zIndex, settings.border);
   windows_[nextId_] = window;
@@ -78,6 +81,7 @@ void WindowManager::refresh() {
 
   // Draw windows.
   while (!windowQueue.empty()) {
+    LOG("Drawing window: " + std::to_string(windowQueue.top()));
     std::shared_ptr<Window> window = windows_[windowQueue.top()];
     window->refresh();
     windowQueue.pop();

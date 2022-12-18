@@ -11,16 +11,16 @@ DCURSES_O = $(DCURSES_CPP:%.cpp=%.o)
 DVIM_CPP = $(wildcard $(SRC)/dvim/*.cpp)
 DVIM_O = $(DVIM_CPP:%.cpp=%.o)
 
-UTIL_CPP = $(wildcard $(SRC)/Utilities.cpp)
-UTIL_O = $(UTIL_CPP:%.cpp=%.o)
+LOG_CPP = $(wildcard $(SRC)/Logging.cpp)
+LOG_O = $(LOG_CPP:%.cpp=%.o)
 
 # No default rules.
 .SUFFIXES:
 
-dvim: $(SRC)/main.cpp $(DCURSES_O) $(DVIM_O) $(UTIL_O)
+dvim: $(SRC)/main.cpp $(DCURSES_O) $(DVIM_O) $(LOG_O)
 	$(CXX) $(CXXFLAGS) $(MODE) $^ -o $@
 
-dvim_dbg: $(SRC)/main.cpp $(DCURSES_O:%.o=%.o.dbg) $(DVIM_O:%.o=%.o.dbg) $(UTIL_O:%.o=%.o.dbg)
+dvim_dbg: $(SRC)/main.cpp $(DCURSES_O:%.o=%.o.dbg) $(DVIM_O:%.o=%.o.dbg) $(LOG_O:%.o=%.o.dbg)
 	$(CXX) $(DBGFLAGS) $(MODE) $^ -o $@
 
 .PHONY: debug
