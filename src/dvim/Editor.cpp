@@ -109,6 +109,57 @@ void Editor::normalInput(char c) {
       moveCursorRight();
       break;
 
+    case 'w':
+      // Move to the beginning of the next word
+      {
+        moveCursorRight();
+        auto nextChar = cursorColIterator_;
+        ++nextChar;
+        while (*cursorColIterator_ != ' ' && nextChar != end(*cursorLineIterator_)) {
+          ++cursorColIterator_;
+          ++cursorColumn_;
+          ++nextChar;
+        }
+        moveCursorRight();
+      }
+      break;
+
+    case 'e':
+      // Move to the end of the current word
+      {
+        auto nextChar = cursorColIterator_;
+        ++nextChar;
+        if (*nextChar == ' ') {
+          moveCursorRight();
+          ++nextChar;
+        }
+        while (*nextChar != ' ' && nextChar != end(*cursorLineIterator_)) {
+          ++cursorColIterator_;
+          ++cursorColumn_;
+          ++nextChar;
+        }
+      }
+      break;
+    
+    case 'b':
+      // Move to the beginning of the previous word
+      {
+        if (cursorColIterator_ == begin(*cursorLineIterator_)) {
+          break;
+        }
+        auto prevChar = cursorColIterator_;
+        --prevChar;
+        if (*prevChar == ' ') {
+          moveCursorLeft();
+          --prevChar;
+        }
+        while (cursorColIterator_ != begin(*cursorLineIterator_) && *prevChar != ' ') {
+          moveCursorLeft();
+          --prevChar;
+        }
+      }
+      break;
+
     case '^':
       cursorColumn_ = 0;
       cursorColIterator_ = begin(*cursorLineIterator_);
@@ -125,7 +176,7 @@ void Editor::normalInput(char c) {
     case ':':
       // Enter command mode
       mode = EditorMode::COMMAND;
-      commandContents_ = "";
+      queuedActions_ = "";
       break;
 
     case 'i':
@@ -264,23 +315,26 @@ void Editor::insertInput(char c) {
 }
 
 void Editor::commandInput(char c) {
-  if (c == '\r') {
+  if (c == '\33') {
+    // ESC = exit command mode
+    mode = EditorMode::NORMAL;
+  } else if (c == '\r') {
     // enter = submit command
     executeCommand();
     if (mode == EditorMode::COMMAND) {
       mode = EditorMode::NORMAL;
     }
   } else if (c == '\x7f') {
-    if (size(commandContents_) != 0) {
-      commandContents_.pop_back();
+    if (size(queuedActions_) != 0) {
+      queuedActions_.pop_back();
     }
   } else {
-    commandContents_ += c;
+    queuedActions_ += c;
   }
 }
 
 void Editor::executeCommand() {
-  for (char c : commandContents_) {
+  for (char c : queuedActions_) {
     if (c == 'w') {
       // Write
       std::ofstream fout(path_);
@@ -297,7 +351,7 @@ void Editor::executeCommand() {
       mode = EditorMode::STOPPED;
     }
   }
-  commandContents_ = "";
+  queuedActions_ = "";
 }
 
 void Editor::visualInput(char c) {
@@ -343,6 +397,7 @@ std::vector<std::string> Editor::getUsageHints() const {
         "o - add line below",
         "O - add line above",
         ": - enter command mode",
+        "v - enter visual mode",
         "x - delete character"
       };
     case EditorMode::INSERT:

@@ -1,11 +1,14 @@
 // Copyright 2022 Daniel Liu
 
-// Object for representing an editor window.
+// Object for representing an editor.
 
+#include <array>
 #include <filesystem>
 #include <list>
 #include <string>
 #include <vector>
+
+#define NUM_REGS 10
 
 #ifndef DVIM_EDITOR_HPP_
 #define DVIM_EDITOR_HPP_
@@ -52,7 +55,7 @@ class Editor {
   /*
    * Returns the current command contents.
    */
-  std::string getCommandContents() const { return commandContents_; }
+  std::string getCommandContents() const { return queuedActions_; }
 
   /*
    * Returns the current mode.
@@ -97,6 +100,7 @@ class Editor {
   void executeCommand();
 
   EditorMode mode = EditorMode::NORMAL;
+
   std::filesystem::path path_;
   std::list<std::list<char>> lines_;
   unsigned int cursorLine_ = 0;
@@ -120,10 +124,16 @@ class Editor {
   std::list<std::list<char>>::iterator cursorLineIterator_;
   std::list<char>::iterator cursorColIterator_;
 
+  // Editor variables
+
+  std::array<std::string, NUM_REGS> registers_;
+
+  // Mode-specific variables
+
   std::list<std::list<char>>::iterator visualStartLineIterator_;
   std::list<char>::iterator visualStartColIterator_;
 
-  std::string commandContents_ = "";
+  std::string queuedActions_ = "";
 };
 
 };
