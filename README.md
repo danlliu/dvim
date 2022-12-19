@@ -1,5 +1,7 @@
 # dvim
 
+[![Compile Check](https://github.com/danlliu/dvim/actions/workflows/compilecheck.yml/badge.svg)](https://github.com/danlliu/dvim/actions/workflows/compilecheck.yml)
+
 dvim is a terminal text editor inspired by the functionality of vim and neovim. 
 dvim is designed to target iTerm2, but can be run on any Linux/macOS terminal.
 
@@ -101,6 +103,9 @@ list of navigation commands is:
 - `j`: move the cursor down.
 - `k`: move the cursor up.
 - `l`: move the cursor right.
+- `w`: move the cursor to the beginning of the next word
+- `e`: move the cursor to the end of the next word
+- `b`: move the cursor to the beginning of the previous word
 - `^`: move the cursor to the first character of the line.
 - `$`: move the cursor to the last character of the line.
 
@@ -126,7 +131,10 @@ To switch to `VISUAL` mode, the following command can be used:
 - `v`: enters `VISUAL` mode at the current cursor location.
 
 ##### `INSERT` mode
-`INSERT` mode is used to edit the file directly.
+`INSERT` mode is used to edit the file directly. The following commands can be
+used in `INSERT` mode:
+
+- `ESC`: exit `INSERT` mode.
 
 ##### `COMMAND` mode
 `COMMAND` mode is used to issue commands to dvim. The following commands are
@@ -135,6 +143,8 @@ available:
 - `w`: write to the file, saving it.
 - `q`: quit the editor for the current file.
 
+To submit a command, press `ENTER`; to cancel, press `ESC`.
+
 Single-letter commands can be placed sequentially; ex. `wq` saves the file and
 exits the editor.
 
@@ -142,6 +152,7 @@ exits the editor.
 `VISUAL` mode is used to select areas of text for modification. In `VISUAL`
 mode, the following commands are available:
 
+- `ESC`: exit `VISUAL` mode.
 - `h`: move the cursor left.
 - `j`: move the cursor down.
 - `k`: move the cursor up.

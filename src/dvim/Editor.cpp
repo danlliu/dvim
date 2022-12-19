@@ -390,6 +390,9 @@ std::vector<std::string> Editor::getUsageHints() const {
         "j - move down",
         "k - move up",
         "l - move right",
+        "w - beginning of next word",
+        "e - end of next word",
+        "b - beginning of previous word",
         "^ - go to beginning of line",
         "$ - go to end of line",
         "i - insert character",
@@ -406,11 +409,16 @@ std::vector<std::string> Editor::getUsageHints() const {
       };
     case EditorMode::COMMAND:
       return {
-        "ESC - exit command mode"
+        "ESC - exit command mode",
+        "ENTER - submit command"
       };
     case EditorMode::VISUAL:
       return {
-        "ESC - exit visual mode"
+        "ESC - exit visual mode",
+        "h - move left",
+        "j - move down",
+        "k - move up",
+        "l - move right"
       };
   }
   return hints;
