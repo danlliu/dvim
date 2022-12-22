@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "dcurses/WindowManager.hpp"
+
 #define NUM_REGS 10
 
 #ifndef DVIM_EDITOR_HPP_
@@ -18,9 +20,9 @@ namespace dvim {
 class Editor {
  public:
   /*
-   * Initialize the editor with the specified file path.
+   * Initialize the editor with the specified file path and window manager.
    */
-  Editor(const std::filesystem::path &path);
+  Editor(const std::filesystem::path &path, dcurses::WindowManager &manager);
 
   /*
    * Handle a single character input action.
@@ -72,6 +74,8 @@ class Editor {
         return "COMMAND";
       case EditorMode::VISUAL:
         return "VISUAL";
+      case EditorMode::REGWINDOW:
+        return "REG SHOW";
       default:
         return "UNKNOWN";
     }
@@ -83,13 +87,15 @@ class Editor {
     NORMAL,
     INSERT,
     COMMAND,
-    VISUAL
+    VISUAL,
+    REGWINDOW
   };
 
   void normalInput(char c);
   void insertInput(char c);
   void commandInput(char c);
   void visualInput(char c);
+  void regWindowInput(char c);
 
   // Common movement
   void moveCursorLeft();
@@ -101,14 +107,13 @@ class Editor {
 
   EditorMode mode = EditorMode::NORMAL;
 
+  dcurses::WindowManager &manager_;
+
   std::filesystem::path path_;
   std::list<std::list<char>> lines_;
   unsigned int cursorLine_ = 0;
   unsigned int cursorColumn_ = 0;
   unsigned int cursorScroll_ = 0;
-
-  // unsigned int visualStartLine_ = 0;
-  // unsigned int visualStartColumn_ = 0;
 
   // Invariants:
   // If NORMAL, COMMAND, or VISUAL mode:
@@ -127,8 +132,12 @@ class Editor {
   // Editor variables
 
   std::array<std::string, NUM_REGS> registers_;
+  unsigned int activeRegister_ = 0;
 
   // Mode-specific variables
+
+  unsigned int visualStartLine_ = 0;
+  unsigned int visualStartColumn_ = 0;
 
   std::list<std::list<char>>::iterator visualStartLineIterator_;
   std::list<char>::iterator visualStartColIterator_;

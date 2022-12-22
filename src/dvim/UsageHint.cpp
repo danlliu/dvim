@@ -27,6 +27,7 @@ std::vector<std::string> layoutUsageHints(const std::vector<std::string> &hints,
   for (unsigned long i = 0; i < size(hints); i += columns) {
     std::string line = "";
     for (unsigned long j = 0; j < columns; j++) {
+      if (i + j >= size(hints)) break;
       line += hints[i + j];
       line += std::string(longestHint - hints[i + j].size(), ' ');
       line += std::string((spacingLeft + j) / columns, ' ');

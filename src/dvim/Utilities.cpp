@@ -4,10 +4,26 @@
 
 #include "Utilities.hpp"
 
+#include <regex>
 #include <string>
 #include <vector>
 
 namespace dvim {
+
+std::string escapeString(const std::string &str) {
+  auto result = str;
+  result = std::regex_replace(result, std::regex("\\n"), "\\n");
+  result = std::regex_replace(result, std::regex("\33"), "\\33");
+  std::string escaped = "";
+  for (auto c : result) {
+    if (c < 32 || c > 126) {
+      escaped += "\\x" + std::to_string(c);
+    } else {
+      escaped += c;
+    }
+  }
+  return escaped;
+}
 
 std::vector<std::string> splitVisibleCharacters(const std::string &str) {
   std::vector<std::string> result;

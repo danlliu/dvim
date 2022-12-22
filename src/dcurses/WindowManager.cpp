@@ -38,6 +38,9 @@ void WindowManager::addWindow(const std::string &name, const WindowSettings &set
     settings.row, settings.col, settings.width, settings.height, settings.zIndex, settings.border);
   windows_[nextId_] = window;
   windowsByName_[name] = nextId_;
+  for (auto &[id, window] : windows_) {
+    window->clearCache();
+  }
   ++nextId_;
 }
 
@@ -60,7 +63,7 @@ std::shared_ptr<Window> WindowManager::operator[](const std::string &name) {
 
 void WindowManager::refresh() {
   auto comp = [&](auto window1, auto window2) {
-    return windows_[window1]->zIndex() < windows_[window2]->zIndex();
+    return windows_[window1]->zIndex() > windows_[window2]->zIndex();
   };
 
   std::vector<int> ids ( size(windows_), 0 );
