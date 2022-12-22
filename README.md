@@ -92,7 +92,27 @@ using `j`, `k`, and `SPACE` to navigate, then pressing `ENTER` to open the file.
 #### `EDITOR` mode
 In `EDITOR` mode, the user is able to edit the selected file. Within `EDITOR` 
 mode, the user can switch between four different modes: `NORMAL`, `INSERT`, 
-`COMMAND`, and `VISUAL` mode.
+`COMMAND`, and `VISUAL` mode. Additional modes are specified when displaying
+windows, such as `REG SHOW` to show all register contents.
+
+##### Editor Design
+
+The editor ([Editor.hpp](src/dvim/Editor.hpp)) consists of two key parts: the
+text contents and the registers.
+
+The text contents represent the contents of the active file. In code, it is
+represented as a linked list of linked lists of characters
+(`std::list<std::list<char>>`), to support fast arbitrary insertion of both
+characters and lines. The current cursor position is tracked by a pair of
+iterators (line and column), as well as two integer values which track the row
+and column indexes. The iterators are used by the code to handle editing, while
+the integer values are primarily used for display purposes.
+
+The registers represent areas which can be used to save strings of copied text.
+There are ten registers total (named `0` through `9`), with one register being
+marked as "active" at any time. The "active" register is the register that will
+be used for copying and pasting. (Note that this is a key difference from Vim,
+where using a different register has to be specified before each operation)
 
 ##### `NORMAL` mode
 `NORMAL` mode is used to navigate the cursor across the file, giving the ability
@@ -122,7 +142,8 @@ enter `INSERT` mode on that new line.
 Additionally, some editing can be performed directly from `NORMAL` mode. The
 following commands can be used:
 
-- `x`: delete the character at the current cursor location.
+- `x`: delete the character at the current cursor location. Saves the character
+into the active register.
 
 To switch to `COMMAND` mode, the following command can be used:
 - `:`: enters `COMMAND` mode.
@@ -134,14 +155,19 @@ To switch to `VISUAL` mode, the following command can be used:
 `INSERT` mode is used to edit the file directly. The following commands can be
 used in `INSERT` mode:
 
-- `ESC`: exit `INSERT` mode.
+- `ESC`: exit `INSERT` mode, switching back to `NORMAL` mode.
 
 ##### `COMMAND` mode
 `COMMAND` mode is used to issue commands to dvim. The following commands are
 available:
 
+- `ESC`: exit `COMMAND` mode, switching back to `NORMAL` mode.
 - `w`: write to the file, saving it.
 - `q`: quit the editor for the current file.
+- `reg show`: show the contents of all registers. The active register is marked
+with a `*`.
+- `reg select <x>`: select the provided register as the active register. `<x>`
+is an integer between 0 and 9.
 
 To submit a command, press `ENTER`; to cancel, press `ESC`.
 
@@ -152,11 +178,13 @@ exits the editor.
 `VISUAL` mode is used to select areas of text for modification. In `VISUAL`
 mode, the following commands are available:
 
-- `ESC`: exit `VISUAL` mode.
+- `ESC`: exit `VISUAL` mode, switching back to `NORMAL` mode.
 - `h`: move the cursor left.
 - `j`: move the cursor down.
 - `k`: move the cursor up.
 - `l`: move the cursor right.
+- `y`: copies the current selection into the active register, and switches back
+to `NORMAL` mode.
 
 ## Acknowledgements
 
