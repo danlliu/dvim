@@ -7,14 +7,18 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <string>
 #include <vector>
 
+#include "Logging.hpp"
+#include "dcurses/Window.hpp"
 #include "Utilities.hpp"
 
 namespace dvim {
 
-Editor::Editor(const std::filesystem::path &path) : path_(path) {
+Editor::Editor(const std::filesystem::path &path,
+  dcurses::WindowManager& manager) : manager_(manager), path_(path) {
   std::string line;
   std::ifstream fin(path);
   while (std::getline(fin, line)) {
@@ -39,6 +43,9 @@ void Editor::handleInput(char ch) {
       break;
     case EditorMode::VISUAL:
       visualInput(ch);
+      break;
+    case EditorMode::REGWINDOW:
+      regWindowInput(ch);
       break;
   }
 }
@@ -222,6 +229,8 @@ void Editor::normalInput(char c) {
     case 'v':
       // Enter visual mode at the current position
       mode = EditorMode::VISUAL;
+      visualStartLine_ = cursorLine_;
+      visualStartColumn_ = cursorColumn_;
       visualStartLineIterator_ = cursorLineIterator_;
       visualStartColIterator_ = cursorColIterator_;
       break;
@@ -234,6 +243,7 @@ void Editor::normalInput(char c) {
         if (cursorColIterator_ == end(*cursorLineIterator_)) {
           break;
         }
+        registers_[activeRegister_] = std::string{*cursorColIterator_};
         auto newColIterator = cursorColIterator_;
         ++newColIterator;
         if (newColIterator == end(*cursorLineIterator_)) {
@@ -247,6 +257,37 @@ void Editor::normalInput(char c) {
         cursorColIterator_ = newColIterator;
       }
       break;
+
+    case 'p':
+      // Paste register content after cursor.
+      {
+        auto toPaste = registers_[activeRegister_];
+        ++cursorColIterator_;
+        for (auto c : toPaste) {
+          if (c == '\n') {
+            auto nextLineInsert = cursorLineIterator_;
+            ++nextLineInsert;
+            lines_.emplace(nextLineInsert, std::list<char>());
+            auto nextLine = cursorLineIterator_;
+            ++nextLine;
+            nextLine->splice(
+              end(*nextLine), *cursorLineIterator_, 
+              cursorColIterator_, end(*cursorLineIterator_));
+            ++cursorLineIterator_;
+            ++cursorLine_;
+            cursorColIterator_ = begin(*cursorLineIterator_);
+            cursorColumn_ = 0;
+          } else {
+            cursorLineIterator_->insert(cursorColIterator_, c);
+            ++cursorColumn_;
+          }
+        }
+        if (cursorColIterator_ != begin(*cursorLineIterator_)) {
+          --cursorColIterator_;
+        }
+      }
+      break;
+
   }
 }
 
@@ -334,21 +375,50 @@ void Editor::commandInput(char c) {
 }
 
 void Editor::executeCommand() {
-  for (char c : queuedActions_) {
-    if (c == 'w') {
-      // Write
-      std::ofstream fout(path_);
-      for (auto lit = begin(lines_); lit != end(lines_); ++lit) {
-        for (auto cit = begin(*lit); cit != end(*lit); ++cit) {
-          fout << *cit;
-        }
-        fout << "\n";
+  if (queuedActions_ == "reg show") {
+    // Open register window
+    mode = EditorMode::REGWINDOW;
+    auto editor = manager_["editor"];
+    manager_.addWindow("registers",
+      { editor->row() + 4, editor->col() + 8, editor->width() - 16, editor->height() - 8, 4, DEFAULT_BORDER}
+    );
+    auto window = manager_["registers"];
+
+    window->setString(2, 3, "Registers");
+    window->setString(3, 3, "=========");
+    for (unsigned int i = 0; i < NUM_REGS; ++i) {
+      if (i == activeRegister_) {
+        window->setString(4 + i, 3, std::to_string(i) + "*: " + dvim::escapeString(registers_[i]));
+      } else {
+        window->setString(4 + i, 3, std::to_string(i) + " : " + dvim::escapeString(registers_[i]));
       }
-      fout.flush();
-      fout.close();
-    } else if (c == 'q') {
-      // Quit
-      mode = EditorMode::STOPPED;
+    }
+  } else if (std::regex_match(queuedActions_, std::regex{"reg select ([0-9]+)"})) {
+    // Select register
+    std::smatch matchResult;
+    std::regex_match(queuedActions_, matchResult, 
+      std::regex{"reg select ([0-9]+)"});
+    unsigned int newRegister = static_cast<unsigned int>(std::stoul(matchResult[1].str()));
+    if (newRegister < NUM_REGS) {
+      activeRegister_ = newRegister;
+    }
+  } else {
+    for (char c : queuedActions_) {
+      if (c == 'w') {
+        // Write
+        std::ofstream fout(path_);
+        for (auto lit = begin(lines_); lit != end(lines_); ++lit) {
+          for (auto cit = begin(*lit); cit != end(*lit); ++cit) {
+            fout << *cit;
+          }
+          fout << "\n";
+        }
+        fout.flush();
+        fout.close();
+      } else if (c == 'q') {
+        // Quit
+        mode = EditorMode::STOPPED;
+      }
     }
   }
   queuedActions_ = "";
@@ -376,6 +446,46 @@ void Editor::visualInput(char c) {
       // Move right
       moveCursorRight();
       break;
+    case 'y':
+      // Copy selection
+      {
+        std::string copyString;
+        bool forward = (cursorLine_ == visualStartLine_) ?
+          (cursorColumn_ > visualStartColumn_) :
+          (cursorLine_ > visualStartLine_);
+        auto lit = forward ? visualStartLineIterator_ : cursorLineIterator_;
+        auto cit = forward ? visualStartColIterator_ : cursorColIterator_;
+        auto elit = forward ? cursorLineIterator_ : visualStartLineIterator_;
+        auto ecit = forward ? cursorColIterator_ : visualStartColIterator_;
+
+        while (lit != elit) {
+          for (; cit != end(*lit); ++cit) {
+            copyString += *cit;
+          }
+          copyString += '\n';
+          ++lit;
+          cit = begin(*lit);
+        }
+        for (; cit != ecit; ++cit) {
+          copyString += *cit;
+        }
+        copyString += *cit;
+        registers_[activeRegister_] = copyString;
+        mode = EditorMode::NORMAL;
+      }
+      break;
+  }
+}
+
+void Editor::regWindowInput(char c) {
+  switch (c) {
+    case '\33':
+      // ESC = exit register window
+      mode = EditorMode::NORMAL;
+      manager_.removeWindow("registers");
+      break;
+    default:
+      break;
   }
 }
 
@@ -401,7 +511,8 @@ std::vector<std::string> Editor::getUsageHints() const {
         "O - add line above",
         ": - enter command mode",
         "v - enter visual mode",
-        "x - delete character"
+        "x - delete character",
+        "p - paste contents of active register"
       };
     case EditorMode::INSERT:
       return {
@@ -410,7 +521,11 @@ std::vector<std::string> Editor::getUsageHints() const {
     case EditorMode::COMMAND:
       return {
         "ESC - exit command mode",
-        "ENTER - submit command"
+        "ENTER - submit command",
+        "w - save file",
+        "q - quit editor",
+        "reg show - show register contents",
+        "reg select <x> - select register x"
       };
     case EditorMode::VISUAL:
       return {
@@ -418,7 +533,12 @@ std::vector<std::string> Editor::getUsageHints() const {
         "h - move left",
         "j - move down",
         "k - move up",
-        "l - move right"
+        "l - move right",
+        "y - copy selection to active register"
+      };
+    case EditorMode::REGWINDOW:
+      return {
+        "ESC - exit register window"
       };
   }
   return hints;

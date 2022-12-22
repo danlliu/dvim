@@ -18,7 +18,7 @@ namespace dvim {
 
 EditorView::EditorView(const std::filesystem::path &path, 
   dcurses::WindowManager &manager, dvim::dvimController& controller) 
-  : windowManager_(manager), controller_(controller), editor_(path), path_(path) {
+  : windowManager_(manager), controller_(controller), editor_(path, manager), path_(path) {
   manager.addWindow("editor", {0, 30, manager.getWidth() - 30, manager.getHeight() - 10, 0, DOUBLE_BORDER});
   window_ = manager["editor"];
   manager.addWindow("command", {manager.getHeight() - 1, 0, manager.getWidth(), 1, 0, NO_BORDER});

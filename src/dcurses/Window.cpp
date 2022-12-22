@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Base64.hpp"
+#include "Logging.hpp"
 #include "dvim/Utilities.hpp"
 
 #define ESC "\33"
@@ -23,18 +24,7 @@ Window::Window(
   int zIndex, const WindowBorder &border) :
   row_ {row}, col_ {col}, width_ {width}, height_ {height}, zIndex_ {zIndex}, 
   border_ {border}, cache_ {height, {width, " "}} {
-  for (unsigned int i = 0; i < width_; ++i) {
-    setString(0, i, border_.top_);
-    setString(height_ - 1, i, border_.bottom_);
-  }
-  for (unsigned int i = 0; i < height_; ++i) {
-    setString(i, 0, border_.left_);
-    setString(i, width_ - 1, border_.right_);
-  }
-  setString(0, 0, border_.top_left_);
-  setString(0, width_ - 1, border_.top_right_);
-  setString(height_ - 1, 0, border_.bottom_left_);
-  setString(height_ - 1, width_ - 1, border_.bottom_right_);
+  clear();
 }
 
 void Window::setCharacter(unsigned int row, unsigned int col, char character) {
@@ -46,7 +36,7 @@ void Window::setString(unsigned int row, unsigned int col, const std::string& st
 }
 
 void Window::drawImage(const ImageContent &image) {
-  if (iterm2_) {
+  if (iterm2_ == 1) {
     directions_.emplace_back(RenderDirection{ image.row_, image.col_, image });
     hasImages_ = true;
   } else {
@@ -131,7 +121,7 @@ void Window::clear() {
       std::cout << ESC << "[" << line << ";" << col << "f";
       std::cout << std::string(width_, ' ');
       for (unsigned int c = 0; c < width_; ++c) {
-        cache_[r][c] = " ";
+        cache_[r][c] = "";
       }
     }
   }
@@ -152,8 +142,14 @@ void Window::clear() {
 }
 
 void Window::clearCache() {
-  cache_.clear();
-  cache_ = std::vector<std::vector<std::string>>(height_, {width_, " "});
+  std::cout << ESC << "[0m";
+  for (unsigned int r = 0; r < height_; ++r) {
+    unsigned int line = row_ + r + 1;
+    unsigned int col = col_ + 1;
+    std::cout << ESC << "[" << line << ";" << col << "H";
+    std::cout << std::string(width_, ' ');
+  }
+  cache_ = std::vector<std::vector<std::string>>(height_, {width_, ""});
 }
 
 int Window::iterm2_ = -1;

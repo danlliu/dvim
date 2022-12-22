@@ -11,6 +11,12 @@
 namespace dvim {
 
 /*
+ * Escapes the given string, with the following characters being escaped:
+ * \n
+ */
+std::string escapeString(const std::string &str);
+
+/*
  * Splits the string into a vector, where each element can be printed out as a one-wide character.
  * Handles splitting color/graphics ANSI escape sequences.
  * @param str The string to split.
