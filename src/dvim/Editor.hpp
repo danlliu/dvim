@@ -55,6 +55,11 @@ class Editor {
   unsigned int getCursorScroll() const { return cursorScroll_; }
 
   /*
+   * Returns the queued actions currently.
+   */
+  std::string getQueuedActions() const { return queuedActions_; }
+
+  /*
    * Returns the current command contents.
    */
   std::string getCommandContents() const { return queuedActions_; }
@@ -103,6 +108,11 @@ class Editor {
   void moveCursorUp();
   void moveCursorDown();
 
+  bool isSingleNavigationAction(char c);
+  bool isSingleInPlaceEditAction(char c);
+  bool isQueueableNormalAction(char c);
+  void executeNormalAction(char c);
+  void executeDeleteAction(char c);
   void executeCommand();
 
   EditorMode mode = EditorMode::NORMAL;
