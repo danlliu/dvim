@@ -144,12 +144,28 @@ following commands can be used:
 
 - `x`: delete the character at the current cursor location. Saves the character
 into the active register.
+- `d` followed by a navigation command: delete a certain range. The possible
+ranges are:
+  - `dh`: delete the previous character
+  - `dl`: delete the current character
+  - `dj`: delete the current line and the line below
+  - `dk`: delete the current line and the line above
+  - `dw`: delete until the end of the current word, including the trailing space
+  - `de`: delete until the end of the current word, not including the trailing 
+  space
+  - `db`: delete until the beginning of the current word, not including the
+  preceding space
+
+All the previous commands can be repeated by typing a number before the command.
+For example, `5x` performs 5 iterations of the `x` command, thus deleting 5
+characters.
 
 To switch to `COMMAND` mode, the following command can be used:
 - `:`: enters `COMMAND` mode.
 
 To switch to `VISUAL` mode, the following command can be used:
 - `v`: enters `VISUAL` mode at the current cursor location.
+- `V`: enters `VISUAL` mode with the current line selected.
 
 ##### `INSERT` mode
 `INSERT` mode is used to edit the file directly. The following commands can be

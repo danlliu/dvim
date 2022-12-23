@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <regex>
 #include <string>
 #include <vector>
@@ -97,8 +98,147 @@ void Editor::moveCursorRight() {
 }
 
 void Editor::normalInput(char c) {
+  if (queuedActions_ != "") {
+    std::smatch match;
+    unsigned int repetitions = 1;
+    if (std::regex_match(queuedActions_, match, std::regex{"([0-9]+)(.*)"})) {
+      repetitions = static_cast<unsigned int>(std::stoul(match[1].str()));
+      queuedActions_ = match[2].str();
+    }
+    for (unsigned int i = 0; i < repetitions; ++i) {
+      if (queuedActions_ == "") {
+        executeNormalAction(c);
+      } else if (queuedActions_ == "d") {
+        executeDeleteAction(c);
+      }
+    }
+    queuedActions_ = "";
+    return;
+  } else if (isSingleNavigationAction(c) || isSingleInPlaceEditAction(c)) {
+    executeNormalAction(c);
+    return;
+  }
   switch (c) {
-    // Navigation Commands
+    // Mode Switching Commands
+
+    case ':':
+      // Enter command mode
+      mode = EditorMode::COMMAND;
+      queuedActions_ = "";
+      break;
+
+    case 'i':
+      // Enter insert mode
+      mode = EditorMode::INSERT;
+      break;
+    
+    case 'a':
+      // Enter insert mode 1 character after
+      mode = EditorMode::INSERT;
+      if (cursorColIterator_ != end(*cursorLineIterator_)) {
+        ++cursorColIterator_;
+        ++cursorColumn_;
+      }
+      break;
+
+    case 'o':
+      // Enter insert mode on a new line
+      {
+        mode = EditorMode::INSERT;
+        auto nextLineIterator = cursorLineIterator_;
+        ++nextLineIterator;
+        lines_.emplace(nextLineIterator, std::list<char>());
+        ++cursorLineIterator_;
+        ++cursorLine_;
+        cursorColIterator_ = begin(*cursorLineIterator_);
+        cursorColumn_ = 0;
+      }
+      break;
+
+    case 'O':
+      // Enter insert mode one line before
+      {
+        mode = EditorMode::INSERT;
+        lines_.emplace(cursorLineIterator_, std::list<char>());
+        --cursorLineIterator_;
+        cursorColIterator_ = begin(*cursorLineIterator_);
+        cursorColumn_ = 0;
+      }
+      break;
+
+
+    case 'v':
+      // Enter visual mode at the current position
+      mode = EditorMode::VISUAL;
+      visualStartLine_ = cursorLine_;
+      visualStartColumn_ = cursorColumn_;
+      visualStartLineIterator_ = cursorLineIterator_;
+      visualStartColIterator_ = cursorColIterator_;
+      break;
+    
+    case 'V':
+      // Enter visual mode with the current line selected
+      mode = EditorMode::VISUAL;
+      {
+        visualStartLineIterator_ = cursorLineIterator_;
+        visualStartColIterator_ = begin(*cursorLineIterator_);
+        visualStartLine_ = cursorLine_;
+        visualStartColumn_ = 0;
+
+        cursorColumn_ = static_cast<unsigned int>(size(*cursorLineIterator_) - 1);
+        cursorColIterator_ = begin(*cursorLineIterator_);
+        std::advance(cursorColIterator_, cursorColumn_);
+      }
+      break;
+
+    default:
+      // Potential queued commands
+      if (isQueueableNormalAction(c) || (c >= '0' && c <= '9')) {
+        queuedActions_ += c;
+      }
+
+  }
+}
+
+bool Editor::isSingleNavigationAction(char c) {
+  switch (c) {
+    case 'h':
+    case 'j':
+    case 'k':
+    case 'l':
+    case 'w':
+    case 'e':
+    case 'b':
+    case '^':
+    case '$':
+    case 'p':
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool Editor::isSingleInPlaceEditAction(char c) {
+  switch (c) {
+    case 'x':
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool Editor::isQueueableNormalAction(char c) {
+  switch (c) {
+    case 'd':
+      return true;
+    default:
+      return false;
+  }
+}
+
+void Editor::executeNormalAction(char c) {
+  switch (c) {
+    // Navigation
 
     case 'h':
       moveCursorLeft();
@@ -178,64 +318,7 @@ void Editor::normalInput(char c) {
       std::advance(cursorColIterator_, cursorColumn_);
       break;
 
-    // Mode Switching Commands
-
-    case ':':
-      // Enter command mode
-      mode = EditorMode::COMMAND;
-      queuedActions_ = "";
-      break;
-
-    case 'i':
-      // Enter insert mode
-      mode = EditorMode::INSERT;
-      break;
-    
-    case 'a':
-      // Enter insert mode 1 character after
-      mode = EditorMode::INSERT;
-      if (cursorColIterator_ != end(*cursorLineIterator_)) {
-        ++cursorColIterator_;
-        ++cursorColumn_;
-      }
-      break;
-
-    case 'o':
-      // Enter insert mode on a new line
-      {
-        mode = EditorMode::INSERT;
-        auto nextLineIterator = cursorLineIterator_;
-        ++nextLineIterator;
-        lines_.emplace(nextLineIterator, std::list<char>());
-        ++cursorLineIterator_;
-        ++cursorLine_;
-        cursorColIterator_ = begin(*cursorLineIterator_);
-        cursorColumn_ = 0;
-      }
-      break;
-
-    case 'O':
-      // Enter insert mode one line before
-      {
-        mode = EditorMode::INSERT;
-        lines_.emplace(cursorLineIterator_, std::list<char>());
-        --cursorLineIterator_;
-        cursorColIterator_ = begin(*cursorLineIterator_);
-        cursorColumn_ = 0;
-      }
-      break;
-
-
-    case 'v':
-      // Enter visual mode at the current position
-      mode = EditorMode::VISUAL;
-      visualStartLine_ = cursorLine_;
-      visualStartColumn_ = cursorColumn_;
-      visualStartLineIterator_ = cursorLineIterator_;
-      visualStartColIterator_ = cursorColIterator_;
-      break;
-
-    // In-Place Editing Commands
+    // Editing
 
     case 'x':
       // Delete character at cursor.
@@ -287,7 +370,158 @@ void Editor::normalInput(char c) {
         }
       }
       break;
+  
+    default:
+      break;
+  }
+}
 
+void Editor::executeDeleteAction(char c) {
+  switch (c) {
+    case 'h':
+      // Delete previous character
+      {
+        auto prev = cursorColIterator_;
+        --prev;
+        if (prev == end(*cursorLineIterator_)) {
+          break;
+        }
+        registers_[activeRegister_] = std::string{*prev};
+        cursorLineIterator_->erase(prev);
+        --cursorColumn_;
+      }
+      break;
+    case 'j':
+      // Delete current line and line below
+      {
+        auto nextLine = cursorLineIterator_;
+        ++nextLine;
+        if (nextLine == end(lines_)) {
+          break;
+        }
+        auto newLine = nextLine;
+        ++newLine;
+        if (newLine == end(lines_)) {
+          newLine = cursorLineIterator_;
+          --newLine;
+          --cursorLine_;
+        }
+        std::string toCopy = "";
+        toCopy += std::string(begin(*cursorLineIterator_), end(*cursorLineIterator_));
+        toCopy += "\n";
+        toCopy += std::string(begin(*nextLine), end(*nextLine));
+        toCopy += "\n";
+        registers_[activeRegister_] = toCopy;
+        lines_.erase(cursorLineIterator_);
+        lines_.erase(nextLine);
+        cursorLineIterator_ = newLine;
+        cursorColIterator_ = begin(*cursorLineIterator_);
+        cursorColumn_ = 0;
+      }
+      break;
+    case 'k':
+      // Delete current line and line above
+      {
+        auto prevLine = cursorLineIterator_;
+        --prevLine;
+        if (prevLine == end(lines_)) {
+          break;
+        }
+        auto nextLine = cursorLineIterator_;
+        ++nextLine;
+        if (nextLine == end(lines_)) {
+          nextLine = prevLine;
+          --cursorLine_;
+          --nextLine;
+        }
+        std::string toCopy = "";
+        toCopy += std::string(begin(*prevLine), end(*prevLine));
+        toCopy += "\n";
+        toCopy += std::string(begin(*cursorLineIterator_), end(*cursorLineIterator_));
+        toCopy += "\n";
+        registers_[activeRegister_] = toCopy;
+        lines_.erase(cursorLineIterator_);
+        lines_.erase(prevLine);
+        cursorLineIterator_ = nextLine;
+        cursorColIterator_ = begin(*cursorLineIterator_);
+        --cursorLine_;
+        cursorColumn_ = 0;
+      }
+      break;
+    case 'l':
+      // Delete current character
+      {
+        auto next = cursorColIterator_;
+        ++next;
+        if (next == end(*cursorLineIterator_)) {
+          next = cursorColIterator_;
+          --next;
+          --cursorColumn_;
+        }
+        registers_[activeRegister_] = std::string{*cursorColIterator_};
+        cursorLineIterator_->erase(cursorColIterator_);
+        cursorColIterator_ = next;
+      }
+      break;
+    case 'w':
+      // Delete until a space has been deleted
+      {
+        bool spaceDeleted = false;
+        std::string toCopy = "";
+        while (!spaceDeleted && cursorColIterator_ != end(*cursorLineIterator_)) {
+          auto next = cursorColIterator_;
+          ++next;
+          toCopy += std::string{*cursorColIterator_};
+          spaceDeleted = *cursorColIterator_ == ' ';
+          cursorLineIterator_->erase(cursorColIterator_);
+          cursorColIterator_ = next;
+        }
+        registers_[activeRegister_] = toCopy;
+      }
+      break;
+    case 'e':
+      // Delete until some characters have been deleted and a space is reached
+      {
+        bool nonSpaceDeleted = false;
+        std::string toCopy = "";
+        while (!(nonSpaceDeleted && *cursorColIterator_ == ' ') && 
+          cursorColIterator_ != end(*cursorLineIterator_)) {
+          auto next = cursorColIterator_;
+          ++next;
+          toCopy += std::string{*cursorColIterator_};
+          nonSpaceDeleted = *cursorColIterator_ != ' ';
+          cursorLineIterator_->erase(cursorColIterator_);
+          cursorColIterator_ = next;
+        }
+        registers_[activeRegister_] = toCopy;
+      }
+      break;
+    case 'b':
+      // Delete previous characters until space is reached
+      {
+        if (cursorColIterator_ == begin(*cursorLineIterator_)) {
+          break;
+        }
+        --cursorColIterator_;
+        bool nonSpaceDeleted = false;
+        std::string toCopy = "";
+        while (!(nonSpaceDeleted && *cursorColIterator_ == ' ') && 
+          cursorColIterator_ != end(*cursorLineIterator_)) {
+          auto prev = cursorColIterator_;
+          --prev;
+          --cursorColumn_;
+          toCopy += std::string{*cursorColIterator_};
+          nonSpaceDeleted = *cursorColIterator_ != ' ';
+          cursorLineIterator_->erase(cursorColIterator_);
+          cursorColIterator_ = prev;
+        }
+        ++cursorColIterator_;
+        toCopy = std::string{rbegin(toCopy), rend(toCopy)};
+        registers_[activeRegister_] = toCopy;
+      }
+      break;
+    default:
+      break;
   }
 }
 
