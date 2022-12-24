@@ -136,9 +136,21 @@ class Window {
   }
 
   /*
+   * Set tmux status.
+   */
+  static void setTmux(int tmux) {
+    if (tmux_ == -1) tmux_ = tmux;
+  }
+
+  /*
    * Get iterm2 status.
    */
   static int getIterm2() { return iterm2_; }
+
+  /*
+   * Get tmux status.
+   */
+  static int getTmux() { return tmux_; }
 
  private:
   struct RenderDirection {
@@ -162,6 +174,7 @@ class Window {
   // 0 = not iterm2
   // 1 = iterm2
   static int iterm2_;
+  static int tmux_;
 };
 
 }  // namespace dcurses
