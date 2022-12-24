@@ -5,12 +5,16 @@
 
 #include "dvim/Editor.hpp"
 
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+
+#include "Logging.hpp"
 
 class RawSTTY {
  public:
@@ -51,6 +55,13 @@ int main() {
   FILE* fp = popen("echo $LC_TERMINAL", "r");
   char value[2];
   dcurses::Window::setIterm2(fread(&value, 1, 2, fp) == 2);
+
+  // tmux detection
+  std::string term {std::getenv("TERM")};
+  if (std::regex_match(term, std::regex{"(screen|tmux).*"})) {
+    LOG("tmux detected");
+    dcurses::Window::setTmux(1);
+  }
 
   dvim::dvimController controller;
   controller.run();

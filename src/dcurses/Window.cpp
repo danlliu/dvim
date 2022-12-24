@@ -72,9 +72,19 @@ void Window::refresh() {
         std::cout << string;
       } else {
         const auto &image = std::get<ImageContent>(direction.content);
-        std::cout << ESC << "]1337;File=inline=1;size=" << size(image.content_);
+        if (getTmux() == 1) {
+          std::cout << "\033Ptmux;\033\033]";
+        } else {
+          std::cout << "\033]";
+        }
+        std::cout << "1337;File=inline=1;size=" << size(image.content_);
         std::cout << ";width=" << image.width_ << ";height=" << image.height_;
-        std::cout << ":" << dcurses::base64Encode(image.content_) << "\a";
+        std::cout << ":" << dcurses::base64Encode(image.content_);
+        if (getTmux() == 1) {
+          std::cout << "\a\033\\";
+        } else {
+          std::cout << "\a";
+        }
       }
     }
     std::cout << std::flush;
@@ -153,5 +163,6 @@ void Window::clearCache() {
 }
 
 int Window::iterm2_ = -1;
+int Window::tmux_ = -1;
 
 }  // namespace dcurses
