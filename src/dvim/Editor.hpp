@@ -65,12 +65,19 @@ class Editor {
   std::string getCommandContents() const { return queuedActions_; }
 
   /*
+   * Returns the current error message (if any).
+   */
+  std::string getErrorMessage() const { return errorMessage_; }
+
+  /*
    * Returns the current mode.
    */
   std::string getMode() const {
     switch (mode) {
       case EditorMode::STOPPED:
         return "STOPPED";
+      case EditorMode::ERROR:
+        return "ERROR";
       case EditorMode::NORMAL:
         return "NORMAL";
       case EditorMode::INSERT:
@@ -89,6 +96,7 @@ class Editor {
  private:
   enum EditorMode {
     STOPPED,
+    ERROR,
     NORMAL,
     INSERT,
     COMMAND,
@@ -145,6 +153,8 @@ class Editor {
   unsigned int activeRegister_ = 0;
 
   // Mode-specific variables
+
+  std::string errorMessage_ = "";
 
   unsigned int visualStartLine_ = 0;
   unsigned int visualStartColumn_ = 0;

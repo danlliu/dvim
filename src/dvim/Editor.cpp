@@ -33,6 +33,9 @@ void Editor::handleInput(char ch) {
   switch (mode) {
     case EditorMode::STOPPED:
       return;
+    case EditorMode::ERROR:
+      mode = EditorMode::NORMAL;
+      break;
     case EditorMode::NORMAL:
       normalInput(ch);
       break;
@@ -636,7 +639,7 @@ void Editor::executeCommand() {
     if (newRegister < NUM_REGS) {
       activeRegister_ = newRegister;
     }
-  } else {
+  } else if (std::regex_match(queuedActions_, std::regex{"[wq]+"})) {
     for (char c : queuedActions_) {
       if (c == 'w') {
         // Write
@@ -654,6 +657,9 @@ void Editor::executeCommand() {
         mode = EditorMode::STOPPED;
       }
     }
+  } else {
+    errorMessage_ = "Unrecognized command " + std::string{queuedActions_};
+    mode = EditorMode::ERROR;
   }
   queuedActions_ = "";
 }
@@ -773,6 +779,10 @@ std::vector<std::string> Editor::getUsageHints() const {
     case EditorMode::REGWINDOW:
       return {
         "ESC - exit register window"
+      };
+    case EditorMode::ERROR:
+      return {
+        "any key - exit error mode"
       };
   }
   return hints;

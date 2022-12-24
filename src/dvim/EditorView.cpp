@@ -66,6 +66,8 @@ void EditorView::refresh() {
     commandWindow_->setString(0, 0, "\33[1m" + editor_.getQueuedActions() + "\33[0m");
   } else if (editor_.getMode() == "COMMAND") {
     commandWindow_->setString(0, 0, "\33[1m:" + editor_.getCommandContents() + "\33[0m");
+  } else if (editor_.getMode() == "ERROR") {
+    commandWindow_->setString(0, 0, "\33[1m\33[1;31m" + editor_.getErrorMessage() + "\33[0m");
   }
 }
 
